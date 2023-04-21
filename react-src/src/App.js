@@ -1,23 +1,41 @@
 import { useEffect } from 'react'
 import './App.css';
+import Stack from '@mui/material/Stack';
+import Toolbar from "./Toolbar/Toolbar";
+import Clients from "./Clients/Clients";
+import Status from "./Status/Status";
+import Templates from "./Templates/Templates";
 
 // Import filesystem namespace
-import { filesystem } from "@neutralinojs/lib"
+import { filesystem, window } from "@neutralinojs/lib";
+import { Divider } from '@mui/material';
 
 function App() {
 
-  // Log current directory or error after component is mounted
-  useEffect(() => {
-    filesystem.readDirectory('./').then((data) => {
-      console.log(data)
-    }).catch((err) => {
-      console.log(err)
-    })
-  }, [])
-
   return (
     <div className="App">
-      <Button variant="contained">Hello World</Button>
+
+      <Stack
+        direction="column"
+        justifyContent="flex-start"
+        alignItems="stretch"
+        flex={1}
+        spacing={0.5}
+      >
+        <Toolbar />
+        <Stack
+          direction="row"
+          justifyContent="flex-start"
+          alignItems="stretch"
+          flex={1}
+          spacing={0.5}
+        >
+          <Clients />
+          <Divider orientation="vertical" variant="middle" flexItem />
+          <Templates />
+        </Stack>
+        <Status />
+      </Stack>
     </div>
   );
 }

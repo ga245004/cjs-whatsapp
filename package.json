@@ -6,7 +6,11 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "build": "nexe"
+    "build": "nexe -t windows-x64-8.9.4",
+    "help": "nexe -h"
+  },
+  "devDependencies": {
+    "nexe": "4.0.0-rc.2"
   },
   "dependencies": {
     "chalk": "^5.2.0",

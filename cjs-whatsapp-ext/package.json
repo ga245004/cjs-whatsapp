@@ -1,27 +1,43 @@
 {
-  "type": "module",
   "name": "cjs-whatsapp",
   "version": "1.0.0",
   "main": "main.js",
   "license": "MIT",
   "scripts": {
-    "start": "node main.js",
-    "build": "bunchee main.js --runtime node --dts -o ../extensions/cjs-whatsapp-ext/main.js --external=websocket",
-    "pack": "nexe -t windows-x64-8.9.4",
+    "start": "node src/client/main.mjs --nl-port 55337 --nl-extension-id js.neutralino.cjs-whatsapp-extension",
+    "build": "webpack",
+    "build:server": "webpack --config webpack.config.server.cjs",
+    "copy": "gulp copyExt --gulpfile gulpfile.cjs",
+    "package": "gulp packageExtPkg --gulpfile gulpfile.cjs",
+    "package:server": "gulp packageServerExt --gulpfile gulpfile.cjs",
+    "test": "npm run build && npm run package && npm run copy && npm run test:package",
+    "test:server": "npm run build:server && npm run package:server && npm run test:package:server",
+    "test:package": ".\\..\\extensions\\cjs-whatsapp-ext\\cjs-whatsapp-ext.exe  --nl-port 55337 --nl-extension-id js.neutralino.cjs-whatsapp-extension",
+    "test:package:server": ".\\cjs-whatsapp-server",
     "help": "nexe -h"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.21.4",
+    "babel-loader": "^9.1.2",
     "bunchee": "^3.1.0",
-    "nexe": "4.0.0-rc.2"
+    "gulp": "^4.0.2",
+    "nexe": "4.0.0-rc.2",
+    "pkg": "^5.8.1",
+    "webpack": "^5.80.0",
+    "webpack-cli": "^5.0.2",
+    "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
     "chalk": "^5.2.0",
     "exceljs": "^4.3.0",
+    "express": "^4.18.2",
     "minimist": "^1.2.6",
     "qrcode-terminal": "^0.12.0",
     "read-excel-file": "^5.6.1",
     "uuid": "^8.3.2",
     "websocket": "^1.0.34",
-    "whatsapp-web.js": "^1.19.5"
+    "whatsapp-web.js": "^1.19.5",
+    "winston": "^3.8.2",
+    "ws": "^8.13.0"
   }
 }

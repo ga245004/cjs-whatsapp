@@ -5,22 +5,22 @@
   "defaultMode": "window",
   "documentRoot": "/cjs-whatsapp-ui/build/",
   "url": "/",
-  "port": 0,
+  "port": 55337,
   "enableServer": true,
   "enableNativeAPI": true,
   "tokenSecurity": "one-time",
   "exportAuthInfo": true,
   "enableExtensions": true,
+  "extensions": [
+    {
+      "id": "js.neutralino.cjs.whatsapp.extension",
+      "commandWindows": "${NL_PATH}/extensions/cjs-whatsapp-ext/cjs-whatsapp-ext.exe"
+    }
+  ],
   "logging": {
     "enabled": true,
     "writeToLogFile": true
   },
-  "extensions": [
-    {
-      "id": "js.neutralino.cjs-whatsapp-extension",
-      "command": "node ${NL_PATH}/extensions/cjs-whatsapp-ext/main.js"
-    }
-  ],
   "nativeAllowList": [
     "app.*",
     "os.*",

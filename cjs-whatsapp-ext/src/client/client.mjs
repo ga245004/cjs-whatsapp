@@ -1,50 +1,86 @@
 import { v4 as uuidv4 } from 'uuid';
 import WebSocket from 'ws';
-import { Logger } from './logger.mjs';
+import { Logger, Util } from './extra.mjs';
 
-export class ExtClient {
+let EXT_CLIENT;
 
-    constructor(port, token, extId) {
-        this.port = port;
-        this.port = token;
-        this.port = extId;
-        const url = `ws://localhost:${port}?extensionId=${extId}`;
-        Logger.info("Connecting to Native UI...", url);
-        this.client = new WebSocket(url);
-        this.client.onerror = this.onError;
-        this.client.onopen = this.onOpen;
-        this.client.onclose = this.onClose;
-        this.client.onmessage = this.onMessage;
+export function ExtClient({ port, token, extId }) {
+    const Instance = {};
+    Instance.port = port;
+    Instance.token = token;
+    Instance.extId = extId;
+
+    Instance.events = {};
+
+    Instance.on = function (event, callback) {
+        if (!Instance.events[event]) {
+            Instance.events[event] = callback;
+        }
+        else {
+            throw new Error(`${event} already subscribed..`);
+        }
     }
 
-    onError() {
+    Instance.publish = function (event, data) {
+        Logger.info(event, data);
+        if (event != "ready" && Instance.events[event]) {
+            const callback = Instance.events[event];
+            callback(data);
+        }
+    }
+
+
+    Instance.onError = function (e) {
         Logger.info('Connection error!', 'ERROR');
     }
 
-    onOpen() {
+    Instance.onOpen = function (e) {
         Logger.info('Connected');
-        setTimeout(() => { this.send("Hi") }, 2 * 1000);
+        const callback = Instance.events["ready"];
+        callback && callback();
     }
 
-    onClose() {
-        Logger.info('Connection closed');
-        process.exit();
+    Instance.onClose = function (e) {
+        Logger.info('Connection closed', e);
+        setTimeout(() => process.exit(), 2 * 1000)
     }
 
-    onMessage(e) {
+    Instance.onMessage = function (e) {
         const { event, data } = JSON.parse(e.data);
-        if (event === "eventToExtension") {
-            setTimeout(() => { this.send(`${getTime()} - Thanks for connecting server...`) }, 2 * 1000);
+        if (event === "eventToExtension" && data && data.extId === Instance.extId) {
+            console.log({ event, data })
+            if (typeof data === 'object') {
+                const { event, data: eventData } = data
+                Instance.publish(event, eventData);
+            }
+            Instance.publish("message", data);
         }
     }
 
-    send(data) {
+    Instance.send = function (data) {
         const e = {
             id: uuidv4(),
             method: "app.broadcast",
-            accessToken: this.token,
-            data: { event: "eventFromExtension", data },
+            accessToken: Instance.token,
+            data: { event: "eventFromExtension", data: { extId: Instance.extId, data } },
         }
-        this.client.send(JSON.stringify(e));
+
+        Instance.client.send(JSON.stringify(e));
     }
+
+
+    const url = `ws://localhost:${port}?extensionId=${extId}`;
+    Instance.client = new WebSocket(url);
+    Instance.client.onerror = Instance.onError;
+    Instance.client.onopen = Instance.onOpen;
+    Instance.client.onclose = Instance.onClose;
+    Instance.client.onmessage = Instance.onMessage;
+
+
+    return Instance;
 }
+
+process.on('uncaughtException', function (err) {
+    console.log('Caught exception: ' + err);
+    Logger.err('Caught exception: ' + err, JSON.stringify(err));
+});

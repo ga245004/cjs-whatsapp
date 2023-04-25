@@ -9,32 +9,43 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 import * as Neutralino from "@neutralinojs/lib";
 import { WhatsWebURL } from '../util/Constants';
+import { WhatsappExt } from '../util/WhatsappExt';
+import ConnectDialog from './ConnectDialog';
+import LoginDialog from './LoginDialog';
 
 export default function AppToolbar() {
 
-    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     const [isMaximized, setIsMaximized] = React.useState(false);
 
-    const onQuit = async () => {
-        await Neutralino.app.exit();
+    const onExtensionReady = (e) => {
+        if (e.detail === "js.neutralino.cjs.whatsapp.extension") {
+            WhatsappExt.publish({
+                extId : e.detail, data : {
+                    event : "loaded",
+                    data : {}
+                }
+            })
+        }
     }
 
-    const onLogin = () => {
-        setIsLoggedIn(true);
+    const onEventFromExtension = (e) => {
+        if (e.type === "eventFromExtension") {
+            WhatsappExt.publish(e.detail)
+        }
+    }
 
-    };
+    React.useEffect(() => {
+        Neutralino.events.on("extensionReady", onExtensionReady);
+        Neutralino.events.on("eventFromExtension", onEventFromExtension);
+        Neutralino.extensions.getStats().then(stats => {
+            console.log(stats);
+        });
+        return () => {
+            Neutralino.events.off("eventFromExtension", onEventFromExtension);
+            Neutralino.events.off("extensionReady", onExtensionReady);
+        }
+    }, []);
 
-    const onConnect = () => {
-        Neutralino.window.create(WhatsWebURL, {
-            enableInspector: true,
-            width: 500,
-            height: 300,
-            maximizable: false,
-            exitProcessOnClose: true,
-        }).then(result => {
-            console.log(result);
-        })
-    };
     React.useEffect(() => {
         const icon = '/logo512.png';
         Neutralino.window.setIcon(icon);
@@ -81,13 +92,8 @@ export default function AppToolbar() {
                     <Box sx={{ flexGrow: 1, height: 64 }} onDoubleClick={onDoubleClick}>
 
                     </Box>
-                    <Button color="inherit" onClick={onConnect}>Connect</Button>
-                    {!isLoggedIn && <Button color="inherit" onClick={onLogin}>Login</Button>}
-                    {isLoggedIn && <>
-                        <Button color="inherit">Open</Button>
-                        <Button color="inherit">Save</Button>
-                    </>}
-                    <Button color="inherit" onClick={onQuit}>Quit</Button>
+                    <ConnectDialog />
+                    <LoginDialog />
                 </Toolbar>
             </AppBar>
         </Box>

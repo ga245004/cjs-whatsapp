@@ -1,19 +1,13 @@
 {
     "name": "js.cjs.whatsapp",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "private": true,
     "scripts": {
-        "start": "react-scripts start",
+        "start": "neu run --frontend-lib-dev",
         "build:ui": "cd ./cjs-whatsapp-ui && npm run build",
-        "build:ext": "cd ./cjs-whatsapp-ext && npm run build",
+        "build:ext": "cd ./cjs-whatsapp-ext && npm run build:ext:dev",
         "build:native": "neu build --release --copy-storage",
         "build": "npm run build:ui && npm run build:ext && npm run build:native",
-        "test": "react-scripts test",
-        "eject": "react-scripts eject",
-        "debug": "node ./debug-js/bundle.js"
-    },
-    "dependencies": {
-        "edit-json-file": "^1.7.0",
-        "fs-extra": "^11.1.1"
+        "build:prod": "npm run build:ui && npm run build:ext && npm run build:native"
     }
 }

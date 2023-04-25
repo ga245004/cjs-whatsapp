@@ -12,11 +12,15 @@ import SaveIcon from "@mui/icons-material/FileDownload"
 import FileOpenIcon from "@mui/icons-material/FileOpen"
 import * as Neutralino from "@neutralinojs/lib";
 import Excel from "exceljs";
+import { WhatsappExt } from '../util/WhatsappExt';
+import Badge from '@mui/material/Badge';
+import Info from '@mui/icons-material/CheckBox';
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 
 class Client {
     id = 0;
-    name = "Rekha";
-    phoneNumber = 9993721254;
+    name = "Test";
+    phoneNumber = 1234567896;
     countryCode = 91
 }
 
@@ -38,14 +42,38 @@ export default function Clients() {
     const [checked, setChecked] = React.useState([]);
     const [clients, setClients] = React.useState(getDummyClients());
 
+    React.useEffect(() => {
+        Neutralino.storage.getData("clients").then(data => {
+            const clients = JSON.parse(data);
+            clients.forEach((t, i) => { t.id = i; });
+            setClients(clients);
+            setChecked([]);
+        })
+    }, []);
+
+
     const onSendTemplate = React.useCallback((event) => {
         const templates = event.detail;
         const template = templates[0];
         console.log("sendTemplate",);
-        Neutralino.os.showNotification(`Sending Messages (${checked.length}) ...`, 
-        `
-            ${template && template.text}
+        if (checked.length > 5) {
+            Neutralino.os.showNotification('Oops :/', 'you can only send 5 message at time before login. please check login.', 'ERROR');
+            return;
+        }
+        Neutralino.os.showNotification(`Sending Messages (${checked.length}) ...`,
+            `
+            ${template && template.message}
         `);
+        checked.forEach(id => {
+            const client = clients.find(c => c.id === id);
+            const number = `${client.countryCode}${client.phoneNumber}`;
+            const data = {
+                message: template.message,
+                media: template.media
+            }
+            console.log("sending message to ", number, data);
+            WhatsappExt.sentTo(number, data);
+        });
         setChecked([]);
     }, [checked]);
 
@@ -83,7 +111,6 @@ export default function Clients() {
 
 
     const OnOpen = async () => {
-        const config = await Neutralino.app.getConfig();
         const files = await Neutralino.os.showOpenDialog("Open Client List", EXCEL_FILE_OPTIONS)
         if (files && files.length > 0) {
             const [file] = files;
@@ -98,6 +125,8 @@ export default function Clients() {
                 if (rowNumber == 1) return;
                 const [_, name, phoneNumber, countryCode] = row.values;
                 clients.push({ id: rowNumber, name, phoneNumber, countryCode });
+                clients.forEach((t, i) => { t.id = i; });
+                Neutralino.storage.setData('clients', JSON.stringify(clients) );
                 setClients(clients);
             });
         }
@@ -118,11 +147,21 @@ export default function Clients() {
         console.log("file saved", newFile);
     }
 
+    const onDelete = (i) => {
+        const newClients = [...clients];
+        const deleted = newClients.splice(i, 1);
+        console.log(i, deleted, newClients)
+        newClients.forEach((c, i) => { c.id = i; });
+        setClients(newClients);
+        Neutralino.storage.setData('clients', JSON.stringify(newClients) );
+        setChecked([]);
+    }
+
     const props = {
         clients,
         checked,
         handleToggle,
-
+        onDelete,
         header: {
             checkedAll,
             onCheckAll,
@@ -136,9 +175,9 @@ export default function Clients() {
     )
 }
 
-function ClientListHeaderUI({ checkedAll, onCheckAll, OnOpen, OnSave }) {
+function ClientListHeaderUI({ checkedAll, onCheckAll, checked, OnOpen, OnSave }) {
     return (
-        <ListSubheader component="div" sx={{ display: 'flex', alignItems: "flex-start", justifyItems: 'flex-start' }}>
+        <ListSubheader component="div" sx={{ display: 'flex', alignItems: "center", justifyItems: 'flex-start' }}>
             <ListItemIcon onClick={onCheckAll} title={` ${!checkedAll ? 'Check' : 'UnCheck'} all client`}>
                 <Checkbox
                     edge="start"
@@ -153,6 +192,9 @@ function ClientListHeaderUI({ checkedAll, onCheckAll, OnOpen, OnSave }) {
                     Customer Information
                 </Typography>
             </Box>
+            {checked.length > 0 && <Badge badgeContent={checked.length} color="primary" title="number of checked client">
+                <Info color="action" />
+            </Badge>}
             <IconButton edge="end" aria-label="open client list" title="open client list" color="primary" onClick={OnOpen}>
                 <FileOpenIcon />
             </IconButton>
@@ -165,11 +207,11 @@ function ClientListHeaderUI({ checkedAll, onCheckAll, OnOpen, OnSave }) {
 
 function ClientListUI(props) {
 
-    const { clients, checked, handleToggle, header } = props
+    const { clients, checked, handleToggle, onDelete, header } = props
 
     return (
-        <Box key={'clients-container'} sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'scroll', maxHeight: 'calc(100vh - 64px - 25px)' }}>
-            <ClientListHeaderUI {...header} />
+        <Box key={'clients-container'} sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'scroll', maxHeight: 'calc(100vh - 64px - 25px)', flex: 1 }}>
+            <ClientListHeaderUI {...header} checked={checked} />
             <List key={'clients'} sx={{ flexGrow: 1, width: '100%', bgcolor: 'background.paper' }}
 
             >
@@ -180,8 +222,8 @@ function ClientListUI(props) {
                             <ListItem
 
                                 secondaryAction={
-                                    <IconButton edge="end" aria-label="comments">
-                                        <CommentIcon />
+                                    <IconButton edge="end" aria-label="delete" title="Delete Contact" onClick={() => onDelete(index)}>
+                                        <DeleteIcon />
                                     </IconButton>
                                 }
                                 disablePadding

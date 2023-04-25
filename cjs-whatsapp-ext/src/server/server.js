@@ -5,7 +5,7 @@ const WebSocket = require('ws');
 const app = express();
 const server = http.createServer(app)
 
-server.listen(55337, function () {
+server.listen(55300, function () {
     console.log('Server running')
 });
 
@@ -19,7 +19,7 @@ wss.on('connection', function (ws) {
     ws.on('message', function (data) {
         console.log('New message: ' + data);
         setTimeout(() => {
-            ws.send(`${getTime()} - Thanks for connecting client...`);
+            ws.send(`${getTime()} - Thanks for connecting server...`);
         }, 2 * 1000)
     })
 });

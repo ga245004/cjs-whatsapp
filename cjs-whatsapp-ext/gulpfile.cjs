@@ -1,16 +1,29 @@
-const { src, dest } = require('gulp');
+const { src, dest, series } = require('gulp');
 const { compile } = require('nexe');
 const { exec } = require('pkg');
+var clean = require('gulp-clean');
 
 const config = {
-  srcPkg: "./dist/main.js",
+  srcPkg: "./dist/cjs-whatsapp-ext.js",
   dest: "./dest/main.js",
-  outputName: "cjs-whatsapp-ext.exe",
+  outputNameExe: "cjs-whatsapp-ext.exe",
+  outputNameJs: "./dist/cjs-whatsapp-ext.js",
   output: "../extensions/cjs-whatsapp-ext/"
 }
 
 function copyExt() {
-  return src(config.outputName)
+  return src(config.outputNameExe)
+    .pipe(clean({ force: true }))
+    .pipe(dest(config.output));
+}
+
+function cleanOutput() {
+  return src(`${config.output}\*`, { read: false })
+    .pipe(clean({ force: true }));
+}
+
+function copyJs() {
+  return src(config.outputNameJs)
     .pipe(dest(config.output));
 }
 
@@ -46,6 +59,7 @@ function packageServerExt(cp) {
 }
 
 exports.copyExt = copyExt;
+exports.copyJs = series(cleanOutput, copyJs);
 exports.packageExtPkg = packageExtPkg;
 exports.packageExtNexe = packageExtNexe;
 exports.packageServerExt = packageServerExt; 

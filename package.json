@@ -5,7 +5,7 @@
     "scripts": {
         "start": "neu run --frontend-lib-dev",
         "build:ui": "cd ./cjs-whatsapp-ui && npm run build",
-        "build:ext": "cd ./cjs-whatsapp-ext && npm run build:ext:dev",
+        "build:ext": "cd ./cjs-whatsapp-ext && npm run build:ext",
         "build:native": "neu build --release --copy-storage",
         "build": "npm run build:ui && npm run build:ext && npm run build:native",
         "build:prod": "npm run build:ui && npm run build:ext && npm run build:native"

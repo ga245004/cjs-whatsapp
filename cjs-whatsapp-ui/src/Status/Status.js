@@ -1,15 +1,9 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
+import { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 import { WhatsappExt } from '../util/WhatsappExt';
 
 export default function Status() {
-    const [message, setMessage] = React.useState({
+    const [message, setMessage] = useState({
         from: "",
         body: "",
         _data : {}
@@ -18,7 +12,7 @@ export default function Status() {
     const onMessage = ([msg]) => {
         setMessage(msg);
     }
-    React.useEffect(() => {
+    useEffect(() => {
         WhatsappExt.on("message", onMessage);
         return () => {
             WhatsappExt.off("message", onMessage);

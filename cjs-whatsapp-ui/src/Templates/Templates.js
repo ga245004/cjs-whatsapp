@@ -1,33 +1,18 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 import { Checkbox, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Stack } from '@mui/material';
-import EditIcon from "@mui/icons-material/EditRounded";
 import RunIcon from "@mui/icons-material/RunCircleTwoTone";
 import DeleteIcon from "@mui/icons-material/DeleteForeverOutlined";
 import * as Neutralino from "@neutralinojs/lib";
 import { AddTemplate } from './AddTemplate';
 
-class Template {
+export class Template {
     id;
     name;
     message;
     media;
-}
-
-const getDummyTemplates = () => {
-    return Array.from({ length: 100 }).map((_, i) => i).map(i => {
-        const c = new Template();
-        c.id = i + 1;
-        c.name = `${c.name} ${i}`;
-        c.message = `${c.message} ${i}`;
-        return c;
-    })
 }
 
 export default function Templates() {
@@ -171,7 +156,7 @@ function ListUI(props) {
                                     <ListItemIcon>
                                         <Checkbox
                                             edge="start"
-                                            checked={checked == template.id}
+                                            checked={checked === template.id}
                                             tabIndex={-1}
                                             disableRipple
                                             inputProps={{ 'aria-labelledby': labelId }}

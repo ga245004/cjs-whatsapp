@@ -59,3 +59,24 @@ const API = function () {
 export {
     API
 }
+
+
+export const checkExpireToken = (token) => {
+    const decode = JSON.parse(atob(token.split('.')[1]));
+    console.log(decode);
+    if (decode.exp * 1000 < new Date().getTime()) {
+        console.log('Time Expired. Check login again..');
+        return false;
+    }
+    return true;
+};
+
+export const getExpireToken = (token) => {
+    const decode = JSON.parse(atob(token.split('.')[1]));
+    console.log(decode);
+    if (decode.exp * 1000 < new Date().getTime()) {
+        console.log('Time Expired. Check login again..');
+        return false;
+    }
+    return true;
+};

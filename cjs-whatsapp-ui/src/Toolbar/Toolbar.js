@@ -1,21 +1,16 @@
-import * as React from 'react';
+import {useEffect, useState} from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 
 import * as Neutralino from "@neutralinojs/lib";
-import { WhatsWebURL } from '../util/Constants';
 import { WhatsappExt } from '../util/WhatsappExt';
 import ConnectDialog from './ConnectDialog';
 import LoginDialog from './LoginDialog';
 
 export default function AppToolbar() {
 
-    const [isMaximized, setIsMaximized] = React.useState(false);
+    const [isMaximized, setIsMaximized] = useState(false);
 
     const onExtensionReady = (e) => {
         if (e.detail === "js.neutralino.cjs.whatsapp.extension") {
@@ -34,7 +29,7 @@ export default function AppToolbar() {
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         Neutralino.events.on("extensionReady", onExtensionReady);
         Neutralino.events.on("eventFromExtension", onEventFromExtension);
         Neutralino.extensions.getStats().then(stats => {
@@ -46,12 +41,12 @@ export default function AppToolbar() {
         }
     }, []);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const icon = '/logo512.png';
         Neutralino.window.setIcon(icon);
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (isMaximized) {
             Neutralino.window.unsetDraggableRegion('draggable-window-area');
         }

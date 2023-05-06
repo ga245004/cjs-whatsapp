@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
@@ -7,10 +7,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
 import { WhatsappExt } from '../util/WhatsappExt';
 import QRCode from "qrcode-svg";
-import { Alert, AlertTitle, Avatar, Box, CircularProgress, Snackbar } from '@mui/material';
+import { Alert, Avatar, Box, CircularProgress, Snackbar } from '@mui/material';
 import Skeleton from '@mui/material/Skeleton';
 import { API } from '../util/API';
 
@@ -48,13 +47,13 @@ function ConnectDialogTitle(props) {
 }
 
 export default function ConnectDialog() {
-    const [open, setOpen] = React.useState(false);
-    const [qrCode, setSetQrCode] = React.useState("");
-    const [status, setStatus] = React.useState("");
-    const [isRefresh, setIsRefresh] = React.useState(false);
-    const [isReady, setIsReady] = React.useState(false);
-    const [isLoading, setIsLoading] = React.useState(false);
-    const [info, setInfo] = React.useState(null);
+    const [open, setOpen] = useState(false);
+    const [qrCode, setSetQrCode] = useState("");
+    const [status, setStatus] = useState("");
+    const [isRefresh, setIsRefresh] = useState(false);
+    const [isReady, setIsReady] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [info, setInfo] = useState(null);
 
     const onQrCode = ([qrCode]) => {
         console.log(qrCode);
@@ -93,7 +92,7 @@ export default function ConnectDialog() {
         }
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         WhatsappExt.on("loaded", onLoaded);
         WhatsappExt.on("qr", onQrCode);
         WhatsappExt.on("loading_screen", onLoading);

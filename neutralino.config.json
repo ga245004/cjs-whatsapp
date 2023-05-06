@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/neutralinojs/neutralinojs/main/schemas/neutralino.config.schema.json",
   "applicationId": "js.cjs.whatsapp",
   "version": "1.0.0",
-  "defaultMode": "chrome",
+  "defaultMode": "window",
   "documentRoot": "/cjs-whatsapp-ui/build/",
   "url": "/",
   "port": 55337,

@@ -3,13 +3,12 @@ import { ExtClient } from './client.mjs';
 import { Logger, Util } from './extra.mjs';
 import { MessageMedia, Client as WhatsappClient, Events as WhatsappEvents } from "whatsapp-web.js";
 import axios from "axios";
+import e from 'express';
 Logger.info("-------------------Start---------------------------");
 Logger.info("Connecting to Native extension...");
 
 const { port, token, extId } = Util.getExtensionDetails();
 const chromeOptions = {};
-
-
 
 async function loadChromeConfig() {
     const chromePort = port + 1;
@@ -30,12 +29,6 @@ async function loadChromeConfig() {
 function connect() {
     const client = new ExtClient({ port, token, extId });
     let whatsappClient = false;
-    let whatsappOptions = {
-        puppeteer: {
-            headless: true,
-            browserWSEndpoint: chromeOptions.webSocketDebuggerUrl
-        },
-    }
     client.on("ready", () => {
 
         client.on("whatsappEvents", ({ event, data }) => {
@@ -51,24 +44,29 @@ function connect() {
                 Logger.info({ number, data });
                 const option = {};
                 if (media) {
-                    const { mimetype, data, filename, filesize } = media;
-                    const msgMedia = new MessageMedia(mimetype, data, filename, filesize);
-                    option.media = msgMedia;
+                    const { minetype, data, filename, filesize } = media;
+                    const msgMedia = new MessageMedia(minetype, data);
+                    console.log(msgMedia);
+                    option.caption = message;
+                    whatsappClient.sendMessage(number, msgMedia, option);
                 }
-                whatsappClient.sendMessage(number, message, option);
+                else{
+                    whatsappClient.sendMessage(number, message, option);
+                }
             }
         });
 
         client.on("connect", () => {
             if (!whatsappClient) {
-                loadChromeConfig().then(() => {
-                    Logger.info("loading whatsapp client with options ...", whatsappOptions);
-                    whatsappOptions = {
+                const chromePath = Util.getChromePath();
+                    let whatsappOptions = {
                         puppeteer: {
                             headless: true,
-                            browserWSEndpoint: chromeOptions.webSocketDebuggerUrl
+                            executablePath: chromePath,
+                            //browserWSEndpoint: chromeOptions.webSocketDebuggerUrl
                         },
                     }
+                    Logger.info("loading whatsapp client with options ...", whatsappOptions);
                     whatsappClient = new WhatsappClient(whatsappOptions);
                     Object.values(WhatsappEvents).forEach(event => {
                         Logger.info("subscribing whatsappEvents =", event);
@@ -79,7 +77,6 @@ function connect() {
                     whatsappClient.initialize();
                     Logger.info("starting whats app client...");
                     client.send("starting whats app client...");
-                });
             }
             else {
                 client.send("already started whatsapp client...");

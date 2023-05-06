@@ -1,25 +1,19 @@
-import * as React from 'react';
+import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import Select from '@mui/material/Select';
-import Switch from '@mui/material/Switch';
 import { ButtonBase, IconButton, Typography, styled } from "@mui/material";
 import AddIcon from "@mui/icons-material/AddCard";
-import TextareaAutosize from '@mui/base/TextareaAutosize';
 import InputUnstyled from '@mui/base/InputUnstyled';
 import * as Neutralino from "@neutralinojs/lib";
-import EditNoteIcon from "@mui/icons-material/EditOutlined"
+import EditNoteIcon from "@mui/icons-material/EditOutlined";
+import { TemplateEditor } from './TemplateEditor';
+import { SerializeSlate } from './TemplateParser';
 
-let sampleMedia = {
+export let sampleMedia = {
     mimetype: "image/png",
     filename: "logo.png",
     filesize: "3090",
@@ -46,12 +40,14 @@ function _arrayBufferToBase64(buffer) {
     return window.btoa(binary);
 }
 
+
 export function AddTemplate({ onAdd, onEdit, index, template }) {
     const isEdit = template ? true : false;
-    const [open, setOpen] = React.useState(false);
-    const [name, setName] = React.useState(template ? template.name : "New Name");
-    const [message, setMessage] = React.useState(template ? template.message : "New Message");
-    const [media, setMedia] = React.useState(template ? template.media : undefined);
+    const [open, setOpen] = useState(false);
+    const [name, setName] = useState(template ? template.name : "New Name");
+    const [slate, setSlate] = useState(template ? template.slate : undefined);
+    const [media, setMedia] = useState(template ? template.media : undefined);
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -67,7 +63,8 @@ export function AddTemplate({ onAdd, onEdit, index, template }) {
         }
         const template = {
             name: name,
-            message: message,
+            message: SerializeSlate(slate, true),
+            slate: slate,
             media: m
         }
         console.log(onAdd, template)
@@ -82,7 +79,8 @@ export function AddTemplate({ onAdd, onEdit, index, template }) {
         }
         const template = {
             name: name,
-            message: message,
+            message: SerializeSlate(slate, true),
+            slate: slate,
             media: m
         }
         console.log(onEdit, template)
@@ -109,8 +107,12 @@ export function AddTemplate({ onAdd, onEdit, index, template }) {
         });
     }
 
+    const onEditorTemplateChange = (value) => {
+        setSlate(value);
+    }
+
     return (
-        <React.Fragment>
+        <>
             {!isEdit && <IconButton edge="end" aria-label="add a new template" title="add a new template" color="primary" onClick={handleClickOpen}>
                 <AddIcon />
             </IconButton>}
@@ -169,13 +171,8 @@ export function AddTemplate({ onAdd, onEdit, index, template }) {
                                 </Image>
                             </ImageButton>
                         </Box>
-                        <TextareaAutosize
-                            minRows={13}
-                            aria-label="message"
-                            placeholder="enter your whatsapp message template.."
-                            value={message}
-                            onChange={(e) => setMessage(e.target.value)}
-                        />
+                        
+                        <TemplateEditor value={slate} onChange={onEditorTemplateChange}/>
                     </Box>
                 </DialogContent>
                 <DialogActions>
@@ -183,7 +180,7 @@ export function AddTemplate({ onAdd, onEdit, index, template }) {
                     {isEdit && <Button onClick={onBeforeUpdate}>Update</Button>}
                 </DialogActions>
             </Dialog>
-        </React.Fragment>
+        </>
     );
 }
 

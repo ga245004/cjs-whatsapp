@@ -1,13 +1,9 @@
-import { useEffect } from 'react'
 import './App.css';
 import Stack from '@mui/material/Stack';
 import Toolbar from "./Toolbar/Toolbar";
 import Clients from "./Clients/Clients";
 import Status from "./Status/Status";
 import Templates from "./Templates/Templates";
-
-// Import filesystem namespace
-import { filesystem, window } from "@neutralinojs/lib";
 import { Divider } from '@mui/material';
 
 function App() {

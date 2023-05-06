@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Dialog from '@mui/material/Dialog';
@@ -7,12 +7,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import Typography from '@mui/material/Typography';
-import { WhatsappExt } from '../util/WhatsappExt';
-import QRCode from "qrcode-svg";
-import { Alert, AlertTitle, Avatar, Box, CircularProgress, Snackbar, TextField } from '@mui/material';
-import Skeleton from '@mui/material/Skeleton';
-import { API } from '../util/API';
+import { Box, TextField } from '@mui/material';
 import * as Neutralino from "@neutralinojs/lib";
 
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
@@ -48,31 +43,10 @@ function LoginDialogTitle(props) {
 }
 
 export default function LoginDialog() {
-    const [open, setOpen] = React.useState(false);
-    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+    const [open, setOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    const checkExpireToken = (token) => {
-        const decode = JSON.parse(atob(token.split('.')[1]));
-        console.log(decode);
-        if (decode.exp * 1000 < new Date().getTime()) {
-            console.log('Time Expired. Check login again..');
-            return false;
-        }
-        return true;
-    };
-
-    const getExpireToken = (token) => {
-        const date  = new Date();
-        const decode = JSON.parse(atob(token.split('.')[1]));
-        console.log(decode);
-        if (decode.exp * 1000 < new Date().getTime()) {
-            console.log('Time Expired. Check login again..');
-            return false;
-        }
-        return true;
-    };
-
-    React.useEffect(() => {
+    useEffect(() => {
         Neutralino.storage.getData("login").then(data => {
             console.log(data)
         }, () => {
@@ -84,6 +58,7 @@ export default function LoginDialog() {
 
     const onBeforeLogin = () => {
 
+        onLogin();
     }
 
     const onLogin = () => {

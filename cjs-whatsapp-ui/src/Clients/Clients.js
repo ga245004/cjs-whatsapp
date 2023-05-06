@@ -1,13 +1,8 @@
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
+import { useCallback, useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 import { Checkbox, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, ListSubheader, Stack } from '@mui/material';
-import CommentIcon from "@mui/icons-material/Comment";
 import SaveIcon from "@mui/icons-material/FileDownload"
 import FileOpenIcon from "@mui/icons-material/FileOpen"
 import * as Neutralino from "@neutralinojs/lib";
@@ -38,21 +33,21 @@ const EXCEL_FILE_OPTIONS = { defaultPath: window.NL_PATH, filters: [{ name: "Exc
 
 export default function Clients() {
 
-    const [checkedAll, setCheckedAll] = React.useState(false);
-    const [checked, setChecked] = React.useState([]);
-    const [clients, setClients] = React.useState(getDummyClients());
+    const [checkedAll, setCheckedAll] = useState(false);
+    const [checked, setChecked] = useState([]);
+    const [clients, setClients] = useState(getDummyClients());
 
-    React.useEffect(() => {
+    useEffect(() => {
         Neutralino.storage.getData("clients").then(data => {
-            const clients = JSON.parse(data);
-            clients.forEach((t, i) => { t.id = i; });
-            setClients(clients);
+            const clientsData = JSON.parse(data);
+            clientsData.forEach((t, i) => { t.id = i; });
+            setClients(clientsData);
             setChecked([]);
         })
     }, []);
 
 
-    const onSendTemplate = React.useCallback((event) => {
+    const onSendTemplate = useCallback((event) => {
         const templates = event.detail;
         const template = templates[0];
         console.log("sendTemplate",);
@@ -75,14 +70,14 @@ export default function Clients() {
             WhatsappExt.sentTo(number, data);
         });
         setChecked([]);
-    }, [checked]);
+    }, [checked, clients]);
 
-    React.useEffect(() => {
+    useEffect(() => {
         Neutralino.events.on('sendTemplate', onSendTemplate);
         return () => {
             Neutralino.events.off('sendTemplate', onSendTemplate);
         }
-    }, [checked]);
+    }, [onSendTemplate]);
 
     const onCheckAll = () => {
         setCheckedAll(!checkedAll);
@@ -122,8 +117,8 @@ export default function Clients() {
             const worksheet = workbook.worksheets[0];
             const clients = [];
             worksheet.eachRow(function (row, rowNumber) {
-                if (rowNumber == 1) return;
-                const [_, name, phoneNumber, countryCode] = row.values;
+                if (rowNumber === 1) return;
+                const [ name, phoneNumber, countryCode] = row.values.splice(0, 1);
                 clients.push({ id: rowNumber, name, phoneNumber, countryCode });
                 clients.forEach((t, i) => { t.id = i; });
                 Neutralino.storage.setData('clients', JSON.stringify(clients) );

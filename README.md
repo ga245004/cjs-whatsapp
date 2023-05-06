@@ -1,39 +1,11 @@
-# neutralinojs-react
-A simple React.js template for building Neutralinojs apps
+# Whatsapp Web Manager
 
-## How to install
+This is a test project that automate the process of sending whatsapp messages to contact numbers.
 
-Create a new Neutralinojs project with this template.
+## Features :-
+-   Upload & Export contact details in excel format.
+-   Creating message templates using images and text formatting
+-   Sending a message template to multiple contacts.
+-   Connection to whatsapp web using whatsapp qrcode scanner.
 
-```
-neu create myapp --template codezri/neutralinojs-react
-```
-
-## How to develop
-
-Install React.js app's dependencies
-
-```
-cd myapp-react
-npm i
-```
-
-Start the development server
-
-```
-cd react-src
-npm start
-```
-
-Start the Neutralinojs app
-
-```
-cd ..
-neu run --frontend-lib-dev
-```
-
-Hot reloading will work, happy coding...
-
-## License
-
-[MIT](LICENSE)
+>   :notice: This just a preview project if you thinking about using it **please read Whatsapp policy about sending mass messages.**

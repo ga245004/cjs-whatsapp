@@ -11,6 +11,8 @@ import { WhatsappExt } from '../util/WhatsappExt';
 import Badge from '@mui/material/Badge';
 import Info from '@mui/icons-material/CheckBox';
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import { AddClient } from './AddClient';
+import SelectAllCheckbox from './SelectAllCheckbox';
 
 class Client {
     id = 0;
@@ -118,10 +120,10 @@ export default function Clients() {
             const clients = [];
             worksheet.eachRow(function (row, rowNumber) {
                 if (rowNumber === 1) return;
-                const [ name, phoneNumber, countryCode] = row.values.splice(0, 1);
+                const [name, phoneNumber, countryCode] = row.values.splice(0, 1);
                 clients.push({ id: rowNumber, name, phoneNumber, countryCode });
                 clients.forEach((t, i) => { t.id = i; });
-                Neutralino.storage.setData('clients', JSON.stringify(clients) );
+                Neutralino.storage.setData('clients', JSON.stringify(clients));
                 setClients(clients);
             });
         }
@@ -142,13 +144,32 @@ export default function Clients() {
         console.log("file saved", newFile);
     }
 
+    const onAdd = (newClient) => {
+        const newClients = [newClient, ...clients];
+        console.log(newClient, newClients)
+        newClients.forEach((c, i) => { c.id = i; });
+        setClients(newClients);
+        Neutralino.storage.setData('clients', JSON.stringify(newClients));
+        setChecked([]);
+    }
+
+    const onEdit = (editClient, i) => {
+        const newClients = [...clients];
+        const deleted = newClients.splice(i, 1, editClient);
+        console.log(i, deleted, newClients)
+        newClients.forEach((c, i) => { c.id = i; });
+        setClients(newClients);
+        Neutralino.storage.setData('clients', JSON.stringify(newClients));
+        setChecked([]);
+    }
+
     const onDelete = (i) => {
         const newClients = [...clients];
         const deleted = newClients.splice(i, 1);
         console.log(i, deleted, newClients)
         newClients.forEach((c, i) => { c.id = i; });
         setClients(newClients);
-        Neutralino.storage.setData('clients', JSON.stringify(newClients) );
+        Neutralino.storage.setData('clients', JSON.stringify(newClients));
         setChecked([]);
     }
 
@@ -156,10 +177,12 @@ export default function Clients() {
         clients,
         checked,
         handleToggle,
+        onEdit,
         onDelete,
         header: {
             checkedAll,
             onCheckAll,
+            onAdd,
             OnOpen: () => OnOpen().then(() => { }),
             OnSave
         }
@@ -170,17 +193,11 @@ export default function Clients() {
     )
 }
 
-function ClientListHeaderUI({ checkedAll, onCheckAll, checked, OnOpen, OnSave }) {
+function ClientListHeaderUI({ checkedAll, onCheckAll, checked, onAdd, OnOpen, OnSave }) {
     return (
         <ListSubheader component="div" sx={{ display: 'flex', alignItems: "center", justifyItems: 'flex-start' }}>
             <ListItemIcon onClick={onCheckAll} title={` ${!checkedAll ? 'Check' : 'UnCheck'} all client`}>
-                <Checkbox
-                    edge="start"
-                    checked={checkedAll}
-                    tabIndex={-1}
-                    disableRipple
-                    inputProps={{ 'aria-labelledby': 'select-all-clients' }}
-                />
+                <SelectAllCheckbox checkedAll={checkedAll} count={checked?.length}/>
             </ListItemIcon>
             <Box sx={{ flex: 1, display: 'flex', alignItems: 'flex-start' }}>
                 <Typography variant="h6">
@@ -190,6 +207,7 @@ function ClientListHeaderUI({ checkedAll, onCheckAll, checked, OnOpen, OnSave })
             {checked.length > 0 && <Badge badgeContent={checked.length} color="primary" title="number of checked client">
                 <Info color="action" />
             </Badge>}
+            <AddClient onAdd={onAdd} />
             <IconButton edge="end" aria-label="open client list" title="open client list" color="primary" onClick={OnOpen}>
                 <FileOpenIcon />
             </IconButton>
@@ -202,7 +220,7 @@ function ClientListHeaderUI({ checkedAll, onCheckAll, checked, OnOpen, OnSave })
 
 function ClientListUI(props) {
 
-    const { clients, checked, handleToggle, onDelete, header } = props
+    const { clients, checked, handleToggle, onDelete, onEdit, header } = props
 
     return (
         <Box key={'clients-container'} sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'scroll', maxHeight: 'calc(100vh - 64px - 25px)', flex: 1 }}>
@@ -211,15 +229,17 @@ function ClientListUI(props) {
 
             >
                 {clients.map((client, index) => {
-                    const labelId = `checkbox-list-label-${client.id}`;
+                    const labelId = `checkbox-list-label-${client.id}-${client.name}`;
                     return (
                         <Box key={labelId}>
                             <ListItem
-
                                 secondaryAction={
-                                    <IconButton edge="end" aria-label="delete" title="Delete Contact" onClick={() => onDelete(index)}>
-                                        <DeleteIcon />
-                                    </IconButton>
+                                    <>
+                                        <AddClient client={client} index={index} onEdit={onEdit} />
+                                        <IconButton edge="end" aria-label="delete" title="Delete Contact" onClick={() => onDelete(index)}>
+                                            <DeleteIcon />
+                                        </IconButton>
+                                    </>
                                 }
                                 disablePadding
                             >
